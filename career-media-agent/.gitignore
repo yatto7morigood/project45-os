@@ -1,0 +1,8 @@
+# Never commit private personal history, ASP credentials, tokens, exports or raw analytics
+knowledge/private/
+data/private/
+.env
+.env.*
+secrets/
+credentials/
+exports/
