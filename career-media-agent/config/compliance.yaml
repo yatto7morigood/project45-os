@@ -1,0 +1,29 @@
+compliance:
+  always:
+    - distinguish personal experience from general information
+    - disclose PR/advertising where required
+    - obey ASP, advertiser and platform rules
+    - do not invent approval rates, CVR, salaries, user counts or campaign terms
+    - do not claim guaranteed job offers or guaranteed salary increases
+    - do not copy competitor wording
+    - do not use unapproved advertiser logos or altered official creatives
+  approval_required_before_publish:
+    - any post where advertiser terms require prior SNS review
+    - any paid campaign
+    - any content using advertiser-owned creative assets
+  human_only:
+    - ASP applications
+    - account credentials
+    - bank/payment settings
+    - final approval of paid spend
+  data_classes:
+    public:
+      - brand configuration
+      - generic prompts
+      - public offer terms
+    private_do_not_commit:
+      - personal legal history
+      - account credentials
+      - raw ASP exports tied to identity
+      - private analytics exports
+      - access tokens

@@ -1,0 +1,27 @@
+platforms:
+  threads:
+    role: discovery
+    primary_kpis: [views, profile_visits, comments]
+    cadence: 2-3 posts/day during testing
+    notes:
+      - Keep each post focused on one idea
+      - Use comment keywords selectively
+      - Validate current character limits before publishing
+  instagram:
+    role: trust_and_capture
+    formats: [reels, carousel]
+    primary_kpis: [reach, saves, comments, profile_visits]
+    cadence:
+      reels: 3/week
+      carousel: 2/week
+    notes:
+      - Reuse winning Threads themes, not identical copy
+      - Comment-to-DM automation must use platform-approved tools/APIs
+  note:
+    role: conversion_hub
+    primary_kpis: [pv, outbound_clicks, cv]
+    cadence: 1-2 free articles/week
+    notes:
+      - Human publication in v1
+      - Separate personal experience from sourced general information
+      - Put ad disclosure near affiliate sections
