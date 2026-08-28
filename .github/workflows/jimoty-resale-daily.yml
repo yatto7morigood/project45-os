@@ -1,0 +1,52 @@
+name: Jimoty resale daily report
+on:
+  schedule:
+    - cron: '30 21 * * *' # 06:30 JST (UTC+9)
+  workflow_dispatch:
+    inputs:
+      import_path:
+        description: 'Optional repository-relative CSV/JSON input (fixture paths are rejected)'
+        required: false
+        default: ''
+      commit_outputs:
+        description: 'Commit generated report/state'
+        required: false
+        default: 'false'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jimoty-resale-agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m pytest
+      - name: Reject synthetic fixture input
+        if: inputs.import_path != ''
+        run: |
+          case "${{ inputs.import_path }}" in
+            *examples/listings.json*) echo "Synthetic fixture cannot be used for a daily report"; exit 1 ;;
+          esac
+      - name: Generate report without external collection
+        run: |
+          if [ -n "${{ inputs.import_path }}" ]; then
+            python -m src.main --mode pipeline --input "../${{ inputs.import_path }}"
+          else
+            python -m src.main --mode pipeline
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jimoty-resale-report
+          path: jimoty-resale-agent/reports/**/*.md
+      - name: Optionally commit generated outputs
+        if: github.event_name == 'workflow_dispatch' && inputs.commit_outputs == 'true'
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports data/state.db
+          git diff --cached --quiet || git commit -m "chore: update Jimoty resale report"
+          git push
