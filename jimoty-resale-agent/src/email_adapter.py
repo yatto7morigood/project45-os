@@ -23,9 +23,10 @@ class LocalEmailAdapter:
 def get(text,key):
  m=re.search(FIELDS[key],text,re.I);return m.group(1).strip() if m else ""
 def parse_message(m:MessageSource)->list[dict[str,Any]]:
- t=m.body; urls=list(dict.fromkeys(x.group(0) for x in URL.finditer(t) if not BAD.match(x.group(0)))) or [""]; typ="inquiry_message" if "新着メッセージ" in f"{m.subject}\n{t}" or "問い合わせ" in t else "listing_notification"; rows=[]
- for url in urls:
-  r={k:get(t,k) for k in FIELDS}; r["location"]=r["location"] or "未確認"; free=any(x in t for x in ("無料でお譲り","無料","0円")); pm=re.search(r"(?:価格|金額)\s*[：:]\s*[¥￥]?\s*([0-9][0-9,]*)",t)
+ t=m.body; matches=[x for x in URL.finditer(t) if not BAD.match(x.group(0))]; urls=list(dict.fromkeys(x.group(0) for x in matches)) or [""]; typ="inquiry_message" if "新着メッセージ" in f"{m.subject}\n{t}" or "問い合わせ" in t else "listing_notification"; rows=[]
+ for index,url in enumerate(urls):
+  window=t if not matches else t[(matches[index-1].end() if index else 0):matches[index].end()]
+  r={k:get(window,k) for k in FIELDS}; r["location"]=r["location"] or "未確認"; free=("無料" in window or re.search(r"(?<![0-9])0円",window)); pm=re.search(r"(?:価格|金額)\s*[：:]\s*[¥￥]?\s*([0-9][0-9,]*)",window)
   r.update({"price":"0" if free else (pm.group(1) if pm else ""),"url":url,"description":" / ".join(f"{k}: {r[k]}" for k in ("manufacturer","series","model","color") if r[k]),"condition":" / ".join(x for x in STATES if x in t),"logistics":" / ".join(x for x in LOGISTICS if x in t),"market_evidence":[],"source_kind":"notification_email","source_name":m.source_name,"received_at":m.received_at,"message_id":m.message_id,"notification_type":typ}); r["id"]=url or "email:"+hashlib.sha256(f"{r['title']}|{r['model']}|{m.message_id}".encode()).hexdigest()[:20]; r["missing_fields"]=[x for x in ("title","price","url","listed_at") if not r[x]];rows.append(r)
  return rows
 def parse_sources(paths:Iterable[str|Path],include_inquiry=False)->list[dict[str,Any]]:
