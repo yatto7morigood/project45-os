@@ -1,0 +1,49 @@
+region:
+  prefecture: 福岡県
+
+collection:
+  mode: manual_import
+  public_fetch_enabled: false
+  min_interval_seconds: 30
+  cache_ttl_minutes: 180
+
+thresholds:
+  minimum_candidate_profit_jpy: 3000
+  minimum_candidate_roi: 0.30
+  strong_profit_jpy: 5000
+  reject_below_profit_jpy: 1500
+
+costs:
+  packaging_transport_default_jpy: 500
+  cleaning_default_jpy: 500
+  new_unused_cleaning_jpy: 0
+  shipping_fallback_jpy: 1500
+
+fees:
+  mercari_rate: 0.10
+  yahoo_auction_rate: 0.10
+  jimoty_rate: 0.00
+
+valuation:
+  low_confidence_haircut: 0.15
+  medium_confidence_haircut: 0.05
+  minimum_comparables_for_medium_confidence: 2
+  evidence_weights:
+    sold: 1.00
+    buyback: 0.85
+    used_retail: 0.65
+    asking: 0.45
+
+score_weights:
+  net_profit: 0.35
+  roi: 0.20
+  liquidity: 0.15
+  evidence_confidence: 0.15
+  condition_certainty: 0.10
+  logistics_risk: 0.05
+
+report:
+  language: ja
+  top_n: 10
+  include_watchlist: true
+  include_rejected_notable: true
