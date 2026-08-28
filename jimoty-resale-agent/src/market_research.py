@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Protocol
 
 QUALITY = {"sold": 4, "buyback": 3, "used_retail": 2, "asking": 1}
 WEIGHTS = {"sold": 1.0, "buyback": .85, "used_retail": .65, "asking": .45}
@@ -26,6 +26,12 @@ class ManualEvidenceProvider:
     """Turns manual/web-search observations supplied by the user into typed records."""
     def records(self, items: Iterable[dict]) -> list[Evidence]:
         return [Evidence(**item) for item in items if item.get("evidence_type") in QUALITY]
+
+
+class MarketResearchProvider(Protocol):
+    """v1.4 extension point. Implementations must use only authorized data sources."""
+    name: str
+    def research(self, *, title: str, model: str | None, category: str | None) -> list[Evidence]: ...
 
 
 def credible(records: Iterable[Evidence]) -> list[Evidence]:

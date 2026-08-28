@@ -3,6 +3,22 @@ from __future__ import annotations
 from statistics import median
 from .market_research import Evidence, WEIGHTS, credible
 
+PRIORITY_BRANDS = {"apple", "sony", "panasonic", "dyson", "aladdin", "nintendo", "canon", "nikon", "makita"}
+
+
+def research_priority(title: str, description: str, acquisition: int, model: str | None, category: str | None = None) -> tuple[int, str, list[str]]:
+    """Triage only; this never estimates a resale price from brand names."""
+    text = f"{title} {description} {category or ''}".lower()
+    points = 20 + (35 if acquisition == 0 else 15 if acquisition <= 1000 else 0)
+    brands = [brand.title() for brand in PRIORITY_BRANDS if brand in text]
+    points += min(30, len(brands) * 20)
+    if model: points += 15
+    if any(word in text for word in ("カメラ", "オーディオ", "工具", "ゲーム", "家電", "ルーター")): points += 10
+    value = min(100, points); potential = "高" if value >= 70 else "中" if value >= 45 else "低"
+    subject = " ".join(([brands[0]] if brands else []) + ([model] if model else []) + [category or title])
+    queries = [f"{subject} 中古 落札", f"{subject} 買取"]
+    return value, potential, queries
+
 
 def weighted_median(records: list[Evidence]) -> int | None:
     rows = credible(records)

@@ -6,7 +6,7 @@ import yaml
 from .collector import manual_import, public_fetch
 from .market_research import ManualEvidenceProvider
 from .normalizer import normalize_listing
-from .scoring import confidence, expected_price, profit, roi, score, stars
+from .scoring import confidence, expected_price, profit, roi, research_priority, score, stars
 from .storage import Storage
 from .report import write_report
 
@@ -16,7 +16,9 @@ def analyse(raw: dict, settings: dict) -> dict | None:
     item = normalize_listing(raw); evidence = ManualEvidenceProvider().records(raw.get("market_evidence", []))
     condition_confirmed = item.condition.lower() in {"新品", "未使用", "new", "unused"} or bool(item.condition)
     level = confidence(evidence, bool(item.model), condition_confirmed); selling = expected_price(evidence, level)
-    if selling is None: return None
+    if selling is None:
+        priority, potential, queries = research_priority(item.title, item.description, item.price, item.model, raw.get("category"))
+        return {"listing": item, "title": item.title, "price": item.price, "model": item.model, "year": item.year, "status": "research_pending", "evidence": [], "research_priority": priority, "potential_value": potential, "search_queries": queries, "checks": "銘板の型番、状態、動作、付属品、傷、製造年ラベル", "risk": "市場証拠未収集。取得前に現物と相場を確認", "score": priority}
     costs=settings["costs"]; channel=raw.get("selling_channel", "mercari")
     shipping = int(raw.get("shipping_jpy", costs["shipping_fallback_jpy"])); repair = costs["new_unused_cleaning_jpy"] if item.condition in ("新品", "未使用") and level != "low" else int(raw.get("repair_jpy", costs["cleaning_default_jpy"]))
     fee=settings["fees"].get(f"{channel}_rate", settings["fees"]["mercari_rate"])
