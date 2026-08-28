@@ -1,0 +1,5 @@
+[
+  {"listing_url":"https://example.invalid/listing-a","source":"fixture","evidence_type":"sold","title":"synthetic/test-only Aladdin AMG-G1300A(G)","price":10000,"url":"https://example.invalid/evidence/a-sold","observed_at":"2026-08-28","notes":"synthetic/test-only"},
+  {"listing_url":"https://example.invalid/listing-a","source":"fixture","evidence_type":"buyback","title":"synthetic/test-only Aladdin AMG-G1300A(G)","price":8500,"url":"https://example.invalid/evidence/a-buyback","observed_at":"2026-08-28","notes":"synthetic/test-only"},
+  {"listing_url":"https://example.invalid/listing-a","source":"fixture","evidence_type":"asking","title":"synthetic/test-only unrelated model","price":999999,"url":"https://example.invalid/evidence/rejected","observed_at":"2026-08-28","notes":"synthetic/test-only"}
+]

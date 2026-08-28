@@ -7,14 +7,16 @@ from pathlib import Path
 def _card(x: dict) -> str:
     evidence = x["evidence"]
     urls = "<br>".join(f"[{e.source}]({e.url})（{e.evidence_type}）" for e in evidence) or "根拠未登録"
+    rejected = "<br>".join(f"[{e.source}]({e.url})（{e.evidence_type}）" for e in x.get("rejected_evidence", [])) or "なし"
     item=x.get("listing")
     condition = item.condition if item else "未確認"; location = item.location if item else "未確認"; listing_url = item.url if item else "未確認"
-    return f'''### {x["title"]}\n\n名称 / {x["title"]}  \n価格 / {x["price"]:,}円  \n型番 / {x["model"] or "未確認"}  \n製造年 or 発売年 / {x["year"] or "未確認"}  \n状態 / {condition or "未確認"}  \n受取地域 / {location or "未確認"}  \n元出品URL / {listing_url or "未確認"}  \n買取相場 / {x["buyback"] or "未確認"}  \nオークション相場 / {x["auction"] or "未確認"}  \n想定売却価格 / {x["expected"]:,}円  \n想定純利益 / {x["profit"]:,}円  \nROI / {x["roi"]:.1%}  \n★評価 / {x["stars"]}  \n信頼度 / {x["confidence"]}  \n主な根拠URL / {urls}  \nリスク / {x["risk"]}\n\nスコア: {x["score"]}/100（利益 {x["components"]["net_profit"]} / ROI {x["components"]["roi"]} / 流動性 {x["components"]["liquidity"]} / 証拠 {x["components"]["evidence_confidence"]} / 状態 {x["components"]["condition_certainty"]} / 物流 {x["components"]["logistics_risk"]}）\n\n'''
+    return f'''### {x["title"]}\n\n名称 / {x["title"]}  \n価格 / {x["price"]:,}円  \n型番 / {x["model"] or "未確認"}  \n製造年 or 発売年 / {x["year"] or "未確認"}  \n状態 / {condition or "未確認"}  \n受取地域 / {location or "未確認"}  \n元出品URL / {listing_url or "未確認"}  \n買取相場 / {x["buyback"] or "未確認"}  \nオークション相場 / {x["auction"] or "未確認"}  \n想定売却価格 / {x["expected"]:,}円  \n想定純利益 / {x["profit"]:,}円  \nROI / {x["roi"]:.1%}  \n★評価 / {x["stars"]}  \n信頼度 / {x["confidence"]}  \n今回取得した市場証拠 / {urls}  \n採用しなかった証拠 / {rejected}  \nリスク / {x["risk"]}\n\nスコア: {x["score"]}/100（利益 {x["components"]["net_profit"]} / ROI {x["components"]["roi"]} / 流動性 {x["components"]["liquidity"]} / 証拠 {x["components"]["evidence_confidence"]} / 状態 {x["components"]["condition_certainty"]} / 物流 {x["components"]["logistics_risk"]}）\n\n'''
 
 
 def _research_card(x: dict) -> str:
     item=x["listing"]
-    return f'''### {x["title"]}\n\n名称 / {x["title"]}  \n価格 / {x["price"]:,}円  \n型番 / {x["model"] or "未確認"}  \n状態 / {item.condition or "未確認"}  \n受取地域 / {item.location or "未確認"}  \n元ジモティーURL / {item.url or "未確認"}  \n潜在価値 / {x["potential_value"]}  \n調査優先度 / {x["research_priority"]}/100  \n確認すべき型番・状態 / {x["checks"]}  \n検索用クエリ候補 / {" / ".join(x["search_queries"])}  \nリスク / {x["risk"]}\n\n'''
+    rejected = "<br>".join(f"[{e.source}]({e.url})（{e.evidence_type}）" for e in x.get("rejected_evidence", [])) or "なし"
+    return f'''### {x["title"]}\n\n名称 / {x["title"]}  \n価格 / {x["price"]:,}円  \n型番 / {x["model"] or "未確認"}  \n状態 / {item.condition or "未確認"}  \n受取地域 / {item.location or "未確認"}  \n元ジモティーURL / {item.url or "未確認"}  \n潜在価値 / {x["potential_value"]}  \n調査優先度 / {x["research_priority"]}/100  \n確認すべき型番・状態 / {x["checks"]}  \n検索用クエリ候補 / {" / ".join(x["search_queries"])}  \n採用しなかった証拠 / {rejected}  \nリスク / {x["risk"]}\n\n'''
 
 
 def write_report(items: list[dict], directory: str | Path, report_date: date | None = None) -> Path:
