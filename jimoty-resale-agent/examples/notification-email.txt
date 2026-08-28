@@ -1,0 +1,13 @@
+synthetic/test-only — Gmail notification export sample. Not live Jimoty data.
+
+商品名: NEC Aterm WX3600HP
+価格: 0円
+地域: 福岡市
+掲載日時: 2026-08-28 06:00
+https://jmty.jp/fukuoka/sale-pcp/article-test-nec
+
+商品名: 型番不明のオーディオアンプ
+価格: 500円
+地域: 福岡市中央区
+掲載日時: 2026-08-28 06:05
+https://jmty.jp/fukuoka/sale-ele/article-test-amp

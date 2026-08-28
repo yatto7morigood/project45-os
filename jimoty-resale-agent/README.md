@@ -12,6 +12,17 @@ python -m pip install -r requirements.txt
 python -m src.main --mode manual_import --input examples/listings.json
 ```
 
+## 通知メールを入力する（v1.2）
+
+ジモティーへ接続せず、ユーザーが正規に受信・保存した通知メールだけを変換します。`.eml`、`.txt`、または `body` / `received_at` を持つ JSON メール配列を使えます。
+
+```powershell
+python -m src.email_adapter --input path\to\notice.eml --input path\to\export.json --output data\notifications.json
+python -m src.main --mode manual_import --input data\notifications.json
+```
+
+商品名、価格、地域、出品URL、掲載日時をメール本文中の明示ラベルから抽出します。欠損は推測せず `missing_fields` に残します。出力 JSON は既存 `manual_import` 互換です。`examples/notification-email.txt` は synthetic/test-only のテスト・デモ用であり、日次処理には使用しません。
+
 当日のレポートは `reports/YYYY-MM-DD.md`、重複判定の状態は `data/state.db` に保存されます。JSON は配列、CSV はヘッダー行つきで、少なくとも `title,price,location,url,listed_at,condition,description` を指定してください。JSON の `market_evidence` には `source,evidence_type,title,price,url,observed_at,notes` を登録できます（`sold / buyback / used_retail / asking`）。
 
 地域・利益閾値・費用は `config/settings.yaml` で変更できます。v1 が自動化するのはインポート後の正規化、証拠整理、計算、重複除外、レポート出力までです。取得は手動で行い、出品者連絡・購入・出品は行いません。
