@@ -1,6 +1,22 @@
 # Jimoty Resale Hunter
 
-福岡県内のジモティー新着出品から、せどり候補を抽出して日次レポートにまとめる専用エージェントです。
+福岡県内のジモティー新着出品から、せどり候補を抽出して日次レポートにまとめる専用エージェントです。v1 は安全な手動インポートで動作し、未確定の型番・状態でも根拠があれば「推論ベースの価値あり候補」に分けて残します。
+
+## 実行方法
+
+Python 3.12 を用意して、次を実行します。
+
+```powershell
+cd jimoty-resale-agent
+python -m pip install -r requirements.txt
+python -m src.main --mode manual_import --input examples/listings.json
+```
+
+当日のレポートは `reports/YYYY-MM-DD.md`、重複判定の状態は `data/state.db` に保存されます。JSON は配列、CSV はヘッダー行つきで、少なくとも `title,price,location,url,listed_at,condition,description` を指定してください。JSON の `market_evidence` には `source,evidence_type,title,price,url,observed_at,notes` を登録できます（`sold / buyback / used_retail / asking`）。
+
+地域・利益閾値・費用は `config/settings.yaml` で変更できます。v1 が自動化するのはインポート後の正規化、証拠整理、計算、重複除外、レポート出力までです。取得は手動で行い、出品者連絡・購入・出品は行いません。
+
+GitHub Actions は Actions タブの **Jimoty resale daily report** から手動実行できます。定刻は毎日 06:30 JST（cron は 21:30 UTC）です。
 
 ## 目的
 毎日、福岡県内の新規出品を確認し、仕入価格と市場価格の差から「利益が出そうな商品だけ」を絞り込みます。
