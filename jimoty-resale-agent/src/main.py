@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 import yaml
 from .collector import manual_import, public_fetch
+from .email_adapter import parse_sources
 from .market_research import ImportedSearchResultProvider, ManualEvidenceProvider
 from .normalizer import normalize_listing
 from .scoring import confidence, expected_price, profit, roi, research_priority, score, stars
@@ -34,13 +35,20 @@ def analyse(raw: dict, settings: dict, provider=None) -> dict | None:
     elif (net >= 3000 and rate >= .30) or (item.price == 0 and evidence) or net >= 5000: status = "confirmed_candidate"
     elif net < 1500: status = "reject"
     else: status = "watchlist"
-    return {"listing": item, "title":item.title,"price":item.price,"model":item.model,"year":item.year,"expected":selling,"profit":net,"roi":rate,"score":value,"components":components,"confidence":level,"stars":stars(net,level,liquidity),"status":status,"evidence":evidence,"rejected_evidence":rejected,"buyback":next((f"{e.price:,}円" for e in evidence if e.evidence_type=="buyback"), None),"auction":next((f"{e.price:,}円" for e in evidence if e.evidence_type=="sold"), None),"risk":"型番・状態・動作を現物で確認" if inferred else "送料・需要変動", "checks":"銘板の型番、通電/動作、付属品、傷、製造年ラベル" if inferred else "",}
+    return {"listing": item, "title":item.title,"price":item.price,"model":item.model,"year":item.year,"expected":selling,"profit":net,"roi":rate,"score":value,"components":components,"confidence":level,"stars":stars(net,level,liquidity),"status":status,"evidence":evidence,"rejected_evidence":rejected,"fee":round(selling*fee),"shipping":shipping,"other_cost":costs["packaging_transport_default_jpy"]+repair,"buyback":next((f"{e.price:,}円" for e in evidence if e.evidence_type=="buyback"), None),"auction":next((f"{e.price:,}円" for e in evidence if e.evidence_type=="sold"), None),"risk":"型番・状態・動作を現物で確認" if inferred else "送料・需要変動", "checks":"銘板の型番、通電/動作、付属品、傷、製造年ラベル" if inferred else "",}
 
 def main() -> None:
-    parser=argparse.ArgumentParser(); parser.add_argument("--mode", choices=["manual_import","public_fetch","pipeline"], default="manual_import"); parser.add_argument("--input"); parser.add_argument("--evidence-input"); parser.add_argument("--db", default=str(ROOT/"data"/"state.db")); parser.add_argument("--reports", default=str(ROOT/"reports")); args=parser.parse_args()
+    parser=argparse.ArgumentParser(); parser.add_argument("--mode", choices=["manual_import","public_fetch","pipeline"], default="manual_import"); parser.add_argument("--input"); parser.add_argument("--email-input", action="append"); parser.add_argument("--evidence-input"); parser.add_argument("--db", default=str(ROOT/"data"/"state.db")); parser.add_argument("--reports", default=str(ROOT/"reports")); args=parser.parse_args()
     with (ROOT / "config" / "settings.yaml").open(encoding="utf-8") as f: settings=yaml.safe_load(f)
     if args.mode in ("manual_import", "pipeline"):
-        raw_items = manual_import(args.input) if args.input else []
+        raw_items = (manual_import(args.input) if args.input else [])
+        if args.mode == "pipeline" and args.email_input: raw_items += parse_sources(args.email_input)
+        # Keep one item per URL/ID before normalization. Empty URLs stay for correction.
+        deduped={}; empty=[]
+        for row in raw_items:
+            key=row.get("url") or row.get("id")
+            (deduped.setdefault(key, row) if key else empty.append(row))
+        raw_items=list(deduped.values())+empty
     else:
         raw_items = public_fetch(enabled=settings["collection"]["public_fetch_enabled"])
     provider=ImportedSearchResultProvider.from_file(args.evidence_input) if args.evidence_input else None

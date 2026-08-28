@@ -34,9 +34,9 @@ jobs:
       - name: Generate report without external collection
         run: |
           if [ -n "${{ inputs.import_path }}" ]; then
-            python -m src.main --mode manual_import --input "../${{ inputs.import_path }}"
+            python -m src.main --mode pipeline --input "../${{ inputs.import_path }}"
           else
-            python -m src.main --mode manual_import
+            python -m src.main --mode pipeline
           fi
       - uses: actions/upload-artifact@v4
         with:

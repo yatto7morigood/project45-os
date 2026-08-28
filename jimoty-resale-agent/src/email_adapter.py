@@ -9,6 +9,7 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 from typing import Any, Iterable
+from typing import Protocol
 
 URL_RE = re.compile(r"https?://(?:www\.)?jmty\.jp/[^\s<>'\"）]+", re.I)
 FIELD_PATTERNS = {
@@ -38,6 +39,11 @@ class LocalEmailAdapter:
         if source.suffix.lower() != ".json": return [MessageSource(text, source_name=source.name)]
         data = json.loads(text); data = data if isinstance(data, list) else [data]
         return [MessageSource(str(x.get("body", x.get("text", ""))), str(x.get("received_at", "")), source.name) for x in data]
+
+
+class NotificationProvider(Protocol):
+    """Future authorized mailbox providers expose local-like MessageSource records."""
+    def messages(self, path: str | Path) -> list[MessageSource]: ...
 
 
 def _field(window: str, field: str) -> str:
