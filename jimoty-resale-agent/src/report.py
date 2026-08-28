@@ -25,4 +25,5 @@ def write_report(items: list[dict], directory: str | Path, report_date: date | N
             lines.append(_card(x))
             if key == "inferred_opportunity": lines.append(f"確認すべきこと / {x['checks']}\n")
     lines += ["## データ品質に関する注意", "", "市場証拠は入力された手動・検索由来の観測のみです。asking は成約価格ではありません。型番・状態が未確認の候補は推論として分離し、取得前に現物確認してください。"]
+    if not items: lines += ["", "入力データが未取得または新規・変更データがありません。synthetic fixture は日次処理に使用していません。"]
     path = directory / f"{report_date.isoformat()}.md"; path.write_text("\n".join(lines), encoding="utf-8"); return path

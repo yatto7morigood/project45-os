@@ -4,6 +4,10 @@ on:
     - cron: '30 21 * * *' # 06:30 JST (UTC+9)
   workflow_dispatch:
     inputs:
+      import_path:
+        description: 'Optional repository-relative CSV/JSON input (fixture paths are rejected)'
+        required: false
+        default: ''
       commit_outputs:
         description: 'Commit generated report/state'
         required: false
@@ -21,11 +25,23 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m pytest
-      - run: python -m src.main --mode manual_import --input examples/listings.json
+      - name: Reject synthetic fixture input
+        if: inputs.import_path != ''
+        run: |
+          case "${{ inputs.import_path }}" in
+            *examples/listings.json*) echo "Synthetic fixture cannot be used for a daily report"; exit 1 ;;
+          esac
+      - name: Generate report without external collection
+        run: |
+          if [ -n "${{ inputs.import_path }}" ]; then
+            python -m src.main --mode manual_import --input "../${{ inputs.import_path }}"
+          else
+            python -m src.main --mode manual_import
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: jimoty-resale-report
-          path: jimoty-resale-agent/reports/*.md
+          path: jimoty-resale-agent/reports/**/*.md
       - name: Optionally commit generated outputs
         if: github.event_name == 'workflow_dispatch' && inputs.commit_outputs == 'true'
         run: |

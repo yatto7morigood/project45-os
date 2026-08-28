@@ -33,7 +33,10 @@ def analyse(raw: dict, settings: dict) -> dict | None:
 def main() -> None:
     parser=argparse.ArgumentParser(); parser.add_argument("--mode", choices=["manual_import","public_fetch"], default="manual_import"); parser.add_argument("--input"); parser.add_argument("--db", default=str(ROOT/"data"/"state.db")); parser.add_argument("--reports", default=str(ROOT/"reports")); args=parser.parse_args()
     with (ROOT / "config" / "settings.yaml").open(encoding="utf-8") as f: settings=yaml.safe_load(f)
-    raw_items = manual_import(args.input) if args.mode == "manual_import" and args.input else public_fetch(enabled=settings["collection"]["public_fetch_enabled"])
+    if args.mode == "manual_import":
+        raw_items = manual_import(args.input) if args.input else []
+    else:
+        raw_items = public_fetch(enabled=settings["collection"]["public_fetch_enabled"])
     Path(args.db).parent.mkdir(parents=True, exist_ok=True); storage=Storage(args.db); results=[]
     for raw in raw_items:
         analysis=analyse(raw, settings)
